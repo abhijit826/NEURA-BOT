@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="AI Chatbot with Claude-like Interface">
+
+    <title>NEURA CHATBOT</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='images/image.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        --primary-bg: #ffffff;
+        --secondary-bg: #f9fafb;
+        --accent-color: #5436DA;
+        --text-primary: #1a1a1a;
+        --text-secondary: #4a5568;
+        --border-color: #e2e8f0;
+        --pink-accent: #FF69B4;
+        --blue-accent: #5436DA;
+    }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem 7rem 1rem;
+        }
+
+        .chat-header {
+          text-align: center;
+          padding: 2rem 0;
+          background: linear-gradient(-45deg, var(--blue-accent), var(--pink-accent), #6e45e2, #ff8ee0);
+          background-size: 400% 400%;
+          color: white;
+          border-radius: 20px;
+          margin-bottom: 2rem;
+          position: relative;
+          overflow: hidden;
+          animation: headerGradient 10s ease infinite;
+      }
+      .chat-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
+        animation: shine 3s infinite linear;
+    }
+        .chat-header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .message {
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .user-message {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .bot-message {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 1rem;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-group {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        #chat-input {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: white;
+            color: var(--text-primary);
+        }
+
+        #gpt-button {
+          background: linear-gradient(-45deg, var(--blue-accent), var(--pink-accent));
+          background-size: 200% 200%;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          padding: 0.75rem 1.5rem;
+          font-weight: 500;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 6px rgba(84, 54, 218, 0.2);
+          animation: buttonGradient 6s ease infinite;
+      }
+      #gpt-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(84, 54, 218, 0.3);
+        animation: buttonGradient 3s ease infinite;
+    }
+
+        .typing-indicator {
+            padding: 1rem;
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .typing-animation {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        @keyframes buttonGradient {
+          0% {
+              background-position: 0% 50%;
+          }
+          50% {
+              background-position: 100% 50%;
+          }
+          100% {
+              background-position: 0% 50%;
+          }
+      }
+        @keyframes headerGradient {
+          0% {
+              background-position: 0% 50%;
+          }
+          50% {
+              background-position: 100% 50%;
+          }
+          100% {
+              background-position: 0% 50%;
+          }
+      }
+      
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 1rem 0.5rem 6rem 0.5rem;
+            }
+
+            .message {
+                padding: 1rem;
+            }
+
+            .chat-header {
+                padding: 1.5rem 0;
+            }
+
+            .chat-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-header">
+        <h1>NEURA-BOT</h1>
+        <p>MADE BY- ABHIJIT, AKSHAY , ARYAN AND SURAJ &copy 2024</p>
+        <p>Presenting Neura To Empower Your Connectivity With Us, A sub part of Gemini   </p>
+
+    </div>
+
+    <main class="chat-container">
+        <div id="list-group" class="chat-messages"></div>
+    </main>
+
+    <div class="input-container">
+        <div class="input-group">
+            <input type="text" class="form-control" id="chat-input" placeholder="Type your message here...">
+            <button id="gpt-button" class="btn">Send</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $("#gpt-button").click(function() {
+            var question = $("#chat-input").val();
+            if (!question.trim()) return;
+
+            let html_data = `
+                <div class="message user-message">
+                    <div class="d-flex align-items-start">
+                        <img src="https://w7.pngwing.com/pngs/178/595/png-transparent-user-profile-computer-icons-login-user-avatars-thumbnail.png"
+                            class="message-avatar" alt="User">
+                        <div class="flex-grow-1">
+                            <p class="mb-0">${question}</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="response" class="typing-indicator">
+                    <div class="typing-animation">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>`;
+
+            $("#chat-input").val("");
+            $("#list-group").append(html_data);
+            scrollToBottom();
+
+            $.ajax({
+                type: "POST",
+                url: "/",
+                data: { 'prompt': question },
+                success: function(data) {
+                    $(".typing-indicator").remove();
+                    let gpt_data = `
+                        <div class="message bot-message">
+                            <div class="d-flex align-items-start">
+                                <img src="{{ url_for('static', filename='images/image.png') }}" 
+                                    class="message-avatar" alt="Bot">
+                                <div class="flex-grow-1">
+                                    <p id="typing-demo" class="mb-0"></p>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    $("#list-group").append(gpt_data);
+                    typeWriter(data);
+                    scrollToBottom();
+                }
+            });
+        });
+
+        function typeWriter(text) {
+            let i = 0;
+            const speed = 5;
+            const element = $("p#typing-demo:last");
+
+            function type() {
+                if (i < text.length) {
+                    element.text(element.text() + text.charAt(i));
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function scrollToBottom() {
+            $('html, body').animate({
+                scrollTop: $(document).height()
+            }, 100);
+        }
+
+        // Handle Enter key
+        $("#chat-input").keypress(function(e) {
+            if (e.which == 13 && !e.shiftKey) {
+                $("#gpt-button").click();
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
